@@ -17,6 +17,8 @@ import com.tom_roush.pdfbox.pdfparser.PDFParser;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
 
+import org.spongycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -73,15 +75,16 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
     }
 
     public void fileDownloaded(String filepath) {
+        if (progressDialog != null) {
+            progressDialog.setMessage("Extracting text from pdf...");
+        }
+        ExtractedTextParser textParser=new ExtractedTextParser();
         TextView textView= findViewById(R.id.result);
        // textView.setText(filepath);
         PDFTextStripper pdfStripper = null;
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
         File file = new File(filepath);
-        if (progressDialog != null) {
-            progressDialog.setMessage("Extracting text from pdf...");
-        }
         try {
             PDFParser parser = new PDFParser(new FileInputStream(file));
             parser.parse();
@@ -91,7 +94,8 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
             pdfStripper.setStartPage(1);
             pdfStripper.setEndPage(1);
             String parsedText = pdfStripper.getText(pdDoc);
-            textView.setText(parsedText);
+
+            textView.setText(textParser.parse(parsedText));
         }
         catch (IOException e)
         {
@@ -104,10 +108,11 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
     @Override
     public void downloadComplete(String str) {
         FileDownloader downloader=new  FileDownloader(this);
-        downloader.execute(LinkFinder.findLink(str,"Lunch Calendar"),"lunch.pdf");
         if (progressDialog != null) {
             progressDialog.setMessage("Downloading PDF...");
         }
+        downloader.execute(LinkFinder.findLink(str,"Lunch Calendar"),"lunch.pdf");
+
 
     }
 
