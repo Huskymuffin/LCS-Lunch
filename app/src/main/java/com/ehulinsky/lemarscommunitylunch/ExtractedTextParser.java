@@ -16,7 +16,7 @@ public class ExtractedTextParser {
 
     }
 
-    public String parse(String str) {
+    public ArrayList<String> parse(String str) {
         ArrayList<String> meals = new ArrayList<>();
         Date d = new Date();
         Calendar c=Calendar.getInstance();
@@ -32,7 +32,7 @@ public class ExtractedTextParser {
                 "9-12 750-850"
         };
 
-        String[] noSchool= { "No School","Christmas Break"};
+        String[] noSchool= { "No School","Christmas Holiday"};
 
         for (String s : replace) {
             str = str.replace(s, "");
@@ -49,6 +49,7 @@ public class ExtractedTextParser {
 
         String line="";
         String meal="";
+        boolean isNoSchool=false;
         for(int i=0;i<str.length();i++)
         {
             if(str.charAt(i)=='\n') {
@@ -64,11 +65,24 @@ public class ExtractedTextParser {
                 }
                 else
                 {
-                    if(!line.equals(""))
-                    {
-                        meal+=line+"\n";
-                        line="";
+                    for(String s: noSchool) {
+                        if(line.equals(s))
+                        {
+                            meals.add(line);
+                            meal="";
+                            line="";
+                            isNoSchool=true;
+                            break;
+                        }
                     }
+
+                    if(!isNoSchool) {
+                        if (!line.equals("")) {
+                            meal += line + "\n";
+                            line = "";
+                        }
+                    }
+                    isNoSchool=false;
                 }
             }
             else
@@ -82,7 +96,7 @@ public class ExtractedTextParser {
         {
             str+=s+"\n\n";
         }
-        return str;
+        return meals;
 
 
     }
