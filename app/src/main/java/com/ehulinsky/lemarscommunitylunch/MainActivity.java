@@ -113,7 +113,7 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
     public int getCurrentWeekday() {
         Calendar c=Calendar.getInstance();
         c.setTime(new Date());
-        c.set(Calendar.DAY_OF_MONTH,29);
+        c.set(Calendar.DAY_OF_MONTH,c.get(Calendar.DAY_OF_MONTH));
         int day=c.get(Calendar.DAY_OF_MONTH);
         if(c.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY)
         {
