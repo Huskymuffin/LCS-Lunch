@@ -10,16 +10,27 @@ import android.arch.persistence.room.PrimaryKey;
 
 @Entity
 public class Menu {
-    @PrimaryKey
+    @PrimaryKey (autoGenerate = true)
     public int id;
 
-    @ColumnInfo(name = "day")
-    private int firstName;
-
     @ColumnInfo(name = "items")
-    private String lastName;
+    private String items;
 
-    @ColumnInfo(name = "coldlunch")
-    private boolean coldLunch;
+    public String getItems() {
+        return items;
+    }
+
+    public void setItems(String items) {
+        this.items = items;
+    }
+
+    public int getId() {
+        return this.id;
+    }
+
+  /*  @ColumnInfo(name = "coldlunch")
+    private boolean coldLunch;*/
+
+
 
 }

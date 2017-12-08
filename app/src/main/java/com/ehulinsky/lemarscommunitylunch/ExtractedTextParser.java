@@ -68,7 +68,8 @@ public class ExtractedTextParser {
                     for(String s: noSchool) {
                         if(line.equals(s))
                         {
-                            meals.add(line);
+                            meal+=line;
+                            meals.add(meal);
                             meal="";
                             line="";
                             isNoSchool=true;
@@ -78,7 +79,7 @@ public class ExtractedTextParser {
 
                     if(!isNoSchool) {
                         if (!line.equals("")) {
-                            meal += line + "\n";
+                            meal+=line+"\n";
                             line = "";
                         }
                     }
@@ -91,11 +92,6 @@ public class ExtractedTextParser {
             }
         }
         Log.v(TAG,meals.toString());
-        str="";
-        for(String s:meals)
-        {
-            str+=s+"\n\n";
-        }
         return meals;
 
 
