@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">LCSD Lunch</string>
+    <string name="reload">Reload</string>
 </resources>

@@ -44,8 +44,8 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
         setContentView(R.layout.activity_main);
 
 
-        if (isNetworkConnected()) {
-            if(App.get().getSP().getBoolean(updateDatabasePref,true)) {
+        if(App.get().getSP().getBoolean(updateDatabasePref,true)) {
+            if (isNetworkConnected()) {
                 progressDialog = new ProgressDialog(this);
                 progressDialog.setMessage("Finding link to lunch menu...");
                 progressDialog.setCancelable(false);
@@ -53,21 +53,22 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
 
                 startDownload();
                 App.get().getSP().edit().putBoolean(updateDatabasePref,false).apply();
+            } else {
+                new AlertDialog.Builder(this)
+                        .setTitle("No Internet Connection")
+                        .setMessage("It looks like your internet connection is off. Please turn it " +
+                                "on and try again.")
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        }).setIcon(android.R.drawable.ic_dialog_alert).show();
             }
-            else
-            {
-                updateFromDb();
-            }
-        } else {
-            new AlertDialog.Builder(this)
-                    .setTitle("No Internet Connection")
-                    .setMessage("It looks like your internet connection is off. Please turn it " +
-                            "on and try again.")
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    }).setIcon(android.R.drawable.ic_dialog_alert).show();
         }
+        else
+        {
+            updateFromDb();
+        }
+
     }
 
     private boolean isNetworkConnected() {
@@ -159,18 +160,13 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
     public int getCurrentWeekday() {
         Calendar c=Calendar.getInstance();
         c.setTime(new Date());
-        c.set(Calendar.DAY_OF_MONTH,c.get(Calendar.DAY_OF_MONTH));
-        int day=c.get(Calendar.DAY_OF_MONTH);
-        if(c.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY)
+        if(c.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY&&c.get(Calendar.DAY_OF_MONTH)!=1)
         {
-            day+=1;
+            c.set(Calendar.DAY_OF_MONTH,c.get(Calendar.DAY_OF_MONTH)-1);
+            //make it saturday, because it works for saturday...
+            // TODO: make this less stupid
         }
-        else if(c.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY)
-        {
-            day+=2;
-        }
-
-        return day-((c.get(Calendar.WEEK_OF_MONTH)-1)*2);
+        return c.get(Calendar.DAY_OF_MONTH)-((c.get(Calendar.WEEK_OF_MONTH)-1)*2);
 
 
     }
