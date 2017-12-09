@@ -2,6 +2,9 @@ package com.ehulinsky.lemarscommunitylunch;
 
 import android.util.Log;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by ethan on 11/28/17.
  */
@@ -11,17 +14,19 @@ public class LinkFinder {
     private LinkFinder() {
     }
 
-    public static String findLink(String html,String linkText) {
+    public static String findLink(String html,String linkText) throws MenuHasWrongDateException {
         StringBuilder link=new StringBuilder();
         boolean foundStartTag=false;
         int startTagIndex=0;
         int endTagIndex=0;
         StringBuilder anchorTag=new StringBuilder();
         int textIndex=html.indexOf(linkText);
+        Calendar today=Calendar.getInstance();
+        today.setTime(new Date());
+        String month=ThingyThatTurnsAMonthIntoAString.monthToString(today.get(Calendar.MONTH));
         if(textIndex==-1)
         {
-            Log.v(TAG,"Link \""+linkText+"\" not found");
-            return "";
+            throw new MenuHasWrongDateException("Could not find calendar for "+month);
         }
         for(int i=textIndex-1;i>=0;i--)
         {

@@ -35,16 +35,21 @@ import java.util.List;
 public class MainActivity extends FragmentActivity implements DownloadCompleteListener, FileDownloadedListener, TextExtractedListener{
 
     ProgressDialog progressDialog;
-    final String updateDatabasePref="updateDatabase";
+    final String monthInDatabasePreference="monthInDatabase";
+    final String hasAppLoadedPreference="hasAppLoaded";
     final String TAG="MainActivity";
+    Calendar today=Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        if(App.get().getSP().getBoolean(updateDatabasePref,true)) {
+        today.setTime(new Date());
+        Log.v(TAG,String.valueOf(App.get().getSP().getInt(monthInDatabasePreference,today.get(Calendar.MONTH))));
+        Log.v(TAG,String.valueOf(App.get().getSP().getBoolean(hasAppLoadedPreference,false)));
+        if(App.get().getSP().getInt(monthInDatabasePreference,today.get(Calendar.MONTH))!=today.get(Calendar.MONTH)||
+                !App.get().getSP().getBoolean(hasAppLoadedPreference,false))
+        {
             if (isNetworkConnected()) {
                 progressDialog = new ProgressDialog(this);
                 progressDialog.setMessage("Finding link to lunch menu...");
@@ -52,7 +57,7 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
                 progressDialog.show();
 
                 startDownload();
-                App.get().getSP().edit().putBoolean(updateDatabasePref,false).apply();
+
             } else {
                 new AlertDialog.Builder(this)
                         .setTitle("No Internet Connection")
@@ -100,10 +105,30 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
     @Override
     public void downloadComplete(String str) {
         FileDownloader downloader=new  FileDownloader(this);
+
+        String month=ThingyThatTurnsAMonthIntoAString.monthToString(today.get(Calendar.MONTH));
+        String link;
+        try {
+            link = LinkFinder.findLink(str, month + " Lunch Calendar");
+        }
+        catch (MenuHasWrongDateException e)
+        {
+            e.printStackTrace();
+            new AlertDialog.Builder(this)
+            .setTitle("Error")
+                .setMessage(e.getMessage())
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).setIcon(android.R.drawable.ic_dialog_alert).show();
+            progressDialog.hide();
+            return;
+        }
+
         if (progressDialog != null) {
             progressDialog.setMessage("Downloading PDF...");
         }
-        downloader.execute(LinkFinder.findLink(str,"Lunch Calendar"),"lunch.pdf");
+        downloader.execute(link,"lunch.pdf");
 
 
     }
@@ -131,8 +156,7 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
             @Override
             public void run() {
                 c.setTime(new Date());
-                ArrayList<String> parsed=textParser.parse(text);
-
+                ArrayList<String> parsed = textParser.parse(text);
                 for(String s:parsed)
                 {
                     menu=new Menu();
@@ -142,7 +166,10 @@ public class MainActivity extends FragmentActivity implements DownloadCompleteLi
 
 
                 App.get().getDB().menuDao().insertAll(menus);
-
+                App.get().getSP().edit()
+                        .putInt(monthInDatabasePreference, today.get(Calendar.MONTH))
+                        .putBoolean(hasAppLoadedPreference, true)
+                        .apply();
 
             }
         });
